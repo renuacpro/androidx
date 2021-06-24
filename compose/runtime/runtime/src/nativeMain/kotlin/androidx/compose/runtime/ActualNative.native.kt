@@ -17,11 +17,12 @@
 package androidx.compose.runtime
 
 import androidx.compose.runtime.snapshots.SnapshotMutableState
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.yield
 import kotlin.native.identityHashCode
 import kotlin.system.getTimeNanos
 import kotlin.time.ExperimentalTime
+import kotlin.native.concurrent.freeze
+import kotlin.native.concurrent.ensureNeverFrozen
 
 // TODO actual thread local lol
 internal actual open class ThreadLocal<T> actual constructor(
@@ -37,19 +38,36 @@ internal actual open class ThreadLocal<T> actual constructor(
 }
 
 actual class AtomicReference<V> actual constructor(value: V) {
-    private val delegate = atomic(value)
+    private val delegate = kotlin.native.concurrent.AtomicReference(value.freeze())
 
     actual fun get(): V = delegate.value
 
     actual fun set(value: V) {
-        delegate.value = value
+        delegate.value = value.freeze()
     }
 
-    actual fun getAndSet(value: V): V =
-        delegate.getAndSet(value)
+    actual fun getAndSet(value: V): V {
+        value.freeze()
+        var old = delegate.value
+        while (!delegate.compareAndSet(old, value)) { old = delegate.value }
+        return old
+    }
 
     actual fun compareAndSet(expect: V, newValue: V): Boolean =
-        delegate.compareAndSet(expect, newValue)
+        delegate.compareAndSet(expect, newValue.freeze())
+}
+
+actual class AtomicInt actual constructor(value: Int) {
+    private val delegate = kotlin.native.concurrent.AtomicInt(value)
+    actual fun get(): Int = delegate.value
+    actual fun set(value: Int) {
+        delegate.value = value
+    }
+    actual fun add(amount: Int): Int =  delegate.addAndGet(amount)
+}
+
+actual fun ensureMutable(it: Any) {
+    it.ensureNeverFrozen()
 }
 
 internal actual fun identityHashCode(instance: Any?): Int =
