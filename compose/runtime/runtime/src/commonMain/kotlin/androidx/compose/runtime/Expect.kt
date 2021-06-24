@@ -54,6 +54,16 @@ expect class AtomicReference<V>(value: V) {
     fun compareAndSet(expect: V, newValue: V): Boolean
 }
 
+expect class AtomicInt(value: Int) {
+    fun get(): Int
+    fun set(value: Int)
+    fun add(amount: Int): Int
+}
+
+fun AtomicInt.postIncrement(): Int = add(1) - 1
+
+expect fun ensureMutable(it: Any)
+
 @MustBeDocumented
 @Retention(AnnotationRetention.SOURCE)
 @Target(
