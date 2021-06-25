@@ -96,14 +96,15 @@ fun Snackbar(
         contentColor = contentColor
     ) {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
-            val textStyle = MaterialTheme.typography.body2
-            ProvideTextStyle(value = textStyle) {
-                when {
-                    action == null -> TextOnlySnackbar(content)
-                    actionOnNewLine -> NewLineButtonSnackbar(content, action)
-                    else -> OneRowSnackbar(content, action)
-                }
-            }
+            TextOnlySnackbar(content)
+//            val textStyle = MaterialTheme.typography.body2
+//            ProvideTextStyle(value = textStyle) {
+//                when {
+//                    action == null -> TextOnlySnackbar(content)
+//                    actionOnNewLine -> NewLineButtonSnackbar(content, action)
+//                    else -> OneRowSnackbar(content, action)
+//                }
+//            }
         }
     }
 }
