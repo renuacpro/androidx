@@ -49,6 +49,7 @@ import org.jetbrains.kotlin.ir.util.DeepCopySymbolRemapper
 import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.hasDefaultValue
 import org.jetbrains.kotlin.ir.util.isLocal
 import org.jetbrains.kotlin.ir.util.patchDeclarationParents
 import org.jetbrains.kotlin.name.Name
@@ -242,8 +243,12 @@ class CreateDecoysTransformer(
                 type = decoyImplementationAnnotation.defaultType,
                 constructorSymbol = decoyImplementationAnnotation.constructors.first().symbol
             ).also {
+                val paramsWithDefaultsBitMask = bitMask(
+                    *valueParameters.map { it.hasDefaultValue() }.toBooleanArray()
+                )
                 it.putValueArgument(0, irConst(name))
                 it.putValueArgument(1, irConst(signatureId))
+                it.putValueArgument(2, irConst(paramsWithDefaultsBitMask))
             }
     }
 
