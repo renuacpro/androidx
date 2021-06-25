@@ -19,6 +19,11 @@ package androidx.compose.foundation.layout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasurePolicy
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.unit.Constraints
 
 /**
  * Component that represents an empty space layout, whose size can be defined using
@@ -30,11 +35,24 @@ import androidx.compose.ui.Modifier
  */
 @Composable
 fun Spacer(modifier: Modifier) {
-    Layout({}, modifier) { _, constraints ->
-        with(constraints) {
-            val width = if (hasFixedWidth) maxWidth else 0
-            val height = if (hasFixedHeight) maxHeight else 0
-            layout(width, height) {}
+    val mp = object : MeasurePolicy {
+        override fun MeasureScope.measure(
+            measurables: List<Measurable>,
+            constraints: Constraints
+        ): MeasureResult {
+            return with(constraints) {
+                val width = if (hasFixedWidth) maxWidth else 0
+                val height = if (hasFixedHeight) maxHeight else 0
+                layout(width, height) {}
+            }
         }
     }
+    Layout({}, modifier, mp)
+//    { _, constraints ->
+//        with(constraints) {
+//            val width = if (hasFixedWidth) maxWidth else 0
+//            val height = if (hasFixedHeight) maxHeight else 0
+//            layout(width, height) {}
+//        }
+//    }
 }

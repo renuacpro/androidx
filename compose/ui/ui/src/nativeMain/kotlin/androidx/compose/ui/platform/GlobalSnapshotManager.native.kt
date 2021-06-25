@@ -41,7 +41,7 @@ internal object GlobalSnapshotManager {
     fun ensureStarted() {
         if (started.compareAndSet(0, 1)) {
             val channel = Channel<Unit>(Channel.CONFLATED)
-            CoroutineScope(Dispatchers.Default).launch {
+            CoroutineScope(Dispatchers.Main).launch {
                 channel.consumeEach {
                     Snapshot.sendApplyNotifications()
                 }

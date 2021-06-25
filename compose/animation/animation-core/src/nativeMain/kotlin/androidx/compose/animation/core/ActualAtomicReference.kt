@@ -19,14 +19,27 @@
 package androidx.compose.animation.core
 
 class NativeAtomicReference<V>(value: V) {
-    fun get(): V =
-        TODO("implement native atomic reference get")
-    fun set(value: V): Unit =
-        TODO("implement native atomic reference set for $value")
-    fun getAndSet(value: V): V =
-        TODO("implement native atomic reference getAndSet for $value")
-    fun compareAndSet(expect: V, newValue: V): Boolean =
-        TODO("implement native atomic reference compareAndSet for $expect, $newValue")
+    private var v: V = value
+
+    fun get(): V = v
+
+    fun set(value: V) {
+        v = value
+    }
+
+    fun getAndSet(value: V): V {
+        val returnV = v
+        v = value
+        return returnV!!
+    }
+
+    fun compareAndSet(expect: V, newValue: V): Boolean {
+        if (v == expect) {
+            v = newValue
+            return true
+        }
+        return false
+    }
 }
 
 internal actual typealias AtomicReference<V> = NativeAtomicReference<V>

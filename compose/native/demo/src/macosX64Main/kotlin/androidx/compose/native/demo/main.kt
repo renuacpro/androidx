@@ -5,20 +5,15 @@ import platform.AppKit.*
 import androidx.compose.native.Window
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.ui.*
 import androidx.compose.ui.input.pointer.pointerMoveFilter
+import androidx.compose.ui.layout.Layout
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 
-/*
-import androidx.compose.material.Text
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-*/
 
 fun main() {
     NSApplication.sharedApplication()
@@ -74,16 +69,7 @@ fun createWindow(title: String) {
                 )
             )
         }
-        /*
-        var text by remember { mutableStateOf("Hello, World!") }
-
-        Button(onClick = {
-            text = "Hello, Desktop!"
-        }) {
-            Text(text)
-        }
-
-        */
     }
     println("end createWindow()")
 }
+
