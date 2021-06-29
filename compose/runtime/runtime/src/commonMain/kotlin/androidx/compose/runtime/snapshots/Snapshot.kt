@@ -25,6 +25,7 @@ import androidx.compose.runtime.postIncrement
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.InternalComposeApi
 import androidx.compose.runtime.SnapshotThreadLocal
+import androidx.compose.runtime.CompositionContextLocal
 import androidx.compose.runtime.snapshots.Snapshot.Companion.notifyObjectsInitialized
 import androidx.compose.runtime.synchronized
 
@@ -1415,14 +1416,14 @@ internal val lock = Any()
 internal inline fun <T> sync(block: () -> T): T = synchronized(lock, block)
 
 // A list of apply observers
-@ThreadLocal
+@CompositionContextLocal
 private val applyObservers = mutableListOf<(Set<Any>, Snapshot) -> Unit>()
 
 // A list of observers of writes to the global state.
-@ThreadLocal
+@CompositionContextLocal
 private var globalWriteObservers: MutableList<((Any) -> Unit)>? = null
 
-@ThreadLocal
+@CompositionContextLocal
 private var currentGlobalSnapshot =
     GlobalSnapshot(
         id = nextSnapshotId.postIncrement(),
