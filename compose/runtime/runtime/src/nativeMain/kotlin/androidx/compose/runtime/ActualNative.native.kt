@@ -24,16 +24,32 @@ import kotlin.time.ExperimentalTime
 import kotlin.native.concurrent.freeze
 import kotlin.native.concurrent.ensureNeverFrozen
 
-// TODO actual thread local lol
+
+@kotlin.native.concurrent.ThreadLocal
+private val threadLocalStorage = mutableMapOf<Any, Any?>()
+
+// TODO:
 internal actual open class ThreadLocal<T> actual constructor(
     initialValue: () -> T
 ) {
-    private var value: T = initialValue()
+    // TODO: not exact semantics as on JVM, initialize initial value only once, not per thread,
+    // as otherwise we have to share create factory.
+    private val initial = initialValue()
+
+    private var value: T
+        get() = threadLocalStorage.getOrPut(this, { initial }) as T
+        set(value) {
+            threadLocalStorage[this] = value
+        }
 
     actual fun get(): T = value
 
     actual fun set(value: T) {
         this.value = value
+    }
+
+    actual fun remove() {
+        threadLocalStorage.remove(this)
     }
 }
 
@@ -74,6 +90,8 @@ internal actual fun identityHashCode(instance: Any?): Int =
     instance.identityHashCode()
 
 actual annotation class TestOnly
+
+actual typealias CompositionContextLocal = kotlin.native.concurrent.ThreadLocal
 
 actual inline fun <R> synchronized(lock: Any, block: () -> R): R =
     block()

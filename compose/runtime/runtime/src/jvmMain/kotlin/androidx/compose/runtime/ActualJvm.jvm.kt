@@ -38,6 +38,10 @@ internal actual open class ThreadLocal<T> actual constructor(
     override fun initialValue(): T? {
         return initialValue.invoke()
     }
+
+    actual override fun remove() {
+        super.remove()
+    }
 }
 
 internal actual class SnapshotThreadLocal<T> {
@@ -65,3 +69,12 @@ internal actual inline fun <R> synchronized(lock: Any, block: () -> R): R {
 }
 
 internal actual typealias TestOnly = org.jetbrains.annotations.TestOnly
+
+actual annotation class CompositionContextLocal
+
+actual class AtomicInt(value: Int) {
+    val delegate = java.util.concurrent.atomic.AtomicInteger(value)
+    fun get(): Int = delegate.intValue()
+    fun set(value: Int) = delegate.set(value)
+    fun add(amount: Int): Int = delegate.addAndGet()
+}

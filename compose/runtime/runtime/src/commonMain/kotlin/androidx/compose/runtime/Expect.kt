@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 internal expect open class ThreadLocal<T>(initialValue: () -> T) {
     fun get(): T
     fun set(value: T)
+    fun remove()
 }
 
 internal fun <T> ThreadLocal() = ThreadLocal<T?> { null }
@@ -63,6 +64,8 @@ expect class AtomicInt(value: Int) {
 fun AtomicInt.postIncrement(): Int = add(1) - 1
 
 expect fun ensureMutable(it: Any)
+
+expect annotation class CompositionContextLocal
 
 @MustBeDocumented
 @Retention(AnnotationRetention.SOURCE)
