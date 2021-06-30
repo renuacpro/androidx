@@ -56,24 +56,35 @@ fun SkVector(x: Float, y: Float): CPointer<SkVector> {
 }
 
 fun makeComplexLTRB(l: Float, t: Float, r: Float, b: Float, radii: FloatArray): RRect {
-    /*
     val rrect = RRect()
+    /*
+    memScoped {
+        val radiiArray = allocArrayOf(
+            radii[0], radii[1],
+            radii[2], radii[3],
+            radii[4], radii[5],
+            radii[6], radii[7]
+        )
 
-    val radiiArray = arrayOf(
-        SkVector(radii[0], radii[1]),
-        SkVector(radii[2], radii[3]),
-        SkVector(radii[4], radii[5]),
-        SkVector(radii[6], radii[7])
-    )
+        rrect.setRectRadii(
+                makeLTRB(l, t, r, b),
+                radiiArray.reinterpret<SkVector>()
+        )
+    }
+    */
+    println("TODO: teach makeComplexLTRB to pass radii to RRect: ${radii.map { it.toString() }}. Taking the first two.")
+    // TODO: just take top level x and y radii for now.
+    rrect.setRectXY(makeLTRB(l, t, r, b), radii[0], radii[1])
 
-     */
-    // rrect.setRectRadii(makeLTRB(l, t, r, b), radiiArray.toCValues())
-    // Sometimes I dearly hate C interop.
-    TODO("implement native makeComplexLTRB")
-
-
-    // return rrect
+    return rrect
 }
+
+fun makeComplexLTRB(l: Float, t: Float, r: Float, b: Float, radiusX: Float, radiusY: Float): RRect {
+    val rrect = RRect()
+    rrect.setRectXY(makeLTRB(l, t, r, b), radiusX, radiusY)
+    return rrect
+}
+
 
 fun RoundRect.toSkiaNativeRRect(): RRect {
     val radii = FloatArray(8)
