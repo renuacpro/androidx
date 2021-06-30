@@ -35,24 +35,11 @@ import androidx.compose.ui.unit.Constraints
  */
 @Composable
 fun Spacer(modifier: Modifier) {
-    val mp = object : MeasurePolicy {
-        override fun MeasureScope.measure(
-            measurables: List<Measurable>,
-            constraints: Constraints
-        ): MeasureResult {
-            return with(constraints) {
-                val width = if (hasFixedWidth) maxWidth else 0
-                val height = if (hasFixedHeight) maxHeight else 0
-                layout(width, height) {}
-            }
+    Layout({}, modifier) { _, constraints ->
+        with(constraints) {
+            val width = if (hasFixedWidth) maxWidth else 0
+            val height = if (hasFixedHeight) maxHeight else 0
+            layout(width, height) {}
         }
     }
-    Layout({}, modifier, mp)
-//    { _, constraints ->
-//        with(constraints) {
-//            val width = if (hasFixedWidth) maxWidth else 0
-//            val height = if (hasFixedHeight) maxHeight else 0
-//            layout(width, height) {}
-//        }
-//    }
 }
