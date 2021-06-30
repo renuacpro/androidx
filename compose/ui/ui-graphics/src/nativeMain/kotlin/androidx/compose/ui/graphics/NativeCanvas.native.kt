@@ -116,10 +116,8 @@ class NativeCanvas(val skia: org.jetbrains.skiko.skia.native.Canvas) : Canvas {
         radiusY: Float,
         paint: Paint
     ) {
-        TODO("implement native NativeCanvas.drawRoundRect")
-        /*
         skia.drawRRect(
-            SkiaNativeRRect.makeLTRB(
+            makeComplexLTRB(
                 left,
                 top,
                 right,
@@ -129,7 +127,6 @@ class NativeCanvas(val skia: org.jetbrains.skiko.skia.native.Canvas) : Canvas {
             ),
             paint.skia
         )
-         */
     }
 
     override fun drawOval(left: Float, top: Float, right: Float, bottom: Float, paint: Paint) {
