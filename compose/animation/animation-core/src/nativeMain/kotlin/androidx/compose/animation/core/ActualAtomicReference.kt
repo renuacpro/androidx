@@ -18,28 +18,5 @@
 @file:Suppress("UNUSED_PARAMETER")
 package androidx.compose.animation.core
 
-class NativeAtomicReference<V>(value: V) {
-    private var v: V = value
+internal actual typealias AtomicReference<V> = androidx.compose.runtime.AtomicReference<V>
 
-    fun get(): V = v
-
-    fun set(value: V) {
-        v = value
-    }
-
-    fun getAndSet(value: V): V {
-        val returnV = v
-        v = value
-        return returnV!!
-    }
-
-    fun compareAndSet(expect: V, newValue: V): Boolean {
-        if (v == expect) {
-            v = newValue
-            return true
-        }
-        return false
-    }
-}
-
-internal actual typealias AtomicReference<V> = NativeAtomicReference<V>

@@ -18,15 +18,4 @@
 @file:Suppress("UNUSED_PARAMETER")
 package androidx.compose.ui.text
 
-class NativeAtomicReference<V>(value: V) {
-    fun get(): V =
-        TODO("implement native atomic reference get")
-    fun set(value: V): Unit =
-        TODO("implement native atomic reference set for $value")
-    fun getAndSet(value: V): V =
-        TODO("implement native atomic reference getAndSet for $value")
-    fun compareAndSet(expect: V, newValue: V): Boolean =
-        TODO("implement native atomic reference compareAndSet for $expect, $newValue")
-}
-
-internal actual typealias AtomicReference<V> = NativeAtomicReference<V>
+internal actual typealias AtomicReference<V> = androidx.compose.runtime.AtomicReference<V>
