@@ -1,18 +1,15 @@
 package androidx.compose.native.demo
 
-import platform.AppKit.*
-
-import androidx.compose.native.Window
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.ui.*
-import androidx.compose.ui.input.pointer.pointerMoveFilter
-import androidx.compose.ui.layout.Layout
+import androidx.compose.native.Window
 import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.input.pointer.pointerMoveFilter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.Color
+import platform.AppKit.*
 
 fun main() {
     NSApplication.sharedApplication()
@@ -23,6 +20,7 @@ fun main() {
 fun createWindow(title: String) {
     println("createWindow()")
     Window(title) {
+        var tick by remember { mutableStateOf(false) }
         Column {
             Box(modifier = Modifier
                 .padding(16.dp)
@@ -47,22 +45,22 @@ fun createWindow(title: String) {
             ) {
                 Box(modifier = Modifier
                     .padding(16.dp)
-                    .background(color = Color.Blue)
+                    .background(color = if (tick) Color.Green else Color.Blue)
                     .width(20.dp).height(20.dp)
                     .clickable {
-                        println("Blue box: clicked")
+                        println("Small box: clicked")
                     }
                     .pointerMoveFilter(
                         onMove = {
-                            println("Blue box: onMove")
+                            println("Small box: onMove")
                             true
                         },
                         onEnter = {
-                            println("Blue box: onEnter")
+                            println("Small box: onEnter")
                             true
                         },
                         onExit = {
-                            println("Blue box: onExit")
+                            println("Small box: onExit")
                             true
                         }
                     )
@@ -75,9 +73,17 @@ fun createWindow(title: String) {
                 modifier = Modifier
                     .padding(16.dp),
                 onClick = {
-                    println("HELLO again!")
+                    println("Button clicked!")
+                    tick = !tick
                 }
             ) {
+            }
+        }
+        LaunchedEffect(Unit) {
+            while (true) {
+                withFrameNanos {
+                    println("NANO: $it, tick: $tick")
+                }
             }
         }
     }
