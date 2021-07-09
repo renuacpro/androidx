@@ -25,7 +25,6 @@ import kotlin.native.concurrent.isFrozen
 import kotlin.native.concurrent.freeze
 import kotlin.native.concurrent.ensureNeverFrozen
 
-
 @kotlin.native.concurrent.ThreadLocal
 private val threadLocalStorage = mutableMapOf<Any, Any?>()
 
@@ -89,7 +88,7 @@ actual class AtomicInt actual constructor(value: Int) {
     actual fun set(value: Int) {
         delegate.value = value
     }
-    actual fun add(amount: Int): Int =  delegate.addAndGet(amount)
+    actual fun add(amount: Int): Int = delegate.addAndGet(amount)
 }
 
 actual fun ensureMutable(it: Any) {
@@ -135,7 +134,7 @@ internal actual fun <T> createSnapshotMutableState(
 ): SnapshotMutableState<T> =
     SnapshotMutableStateImpl(value, policy)
 
-//fixme: not actually thread local
+// fixme: not actually thread local
 internal actual class SnapshotThreadLocal<T> actual constructor() {
     private var value: T? = null
 

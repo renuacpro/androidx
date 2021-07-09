@@ -55,9 +55,11 @@ import androidx.compose.ui.util.fastMap
  * TODO: This is a temporary constructor
  * until the SAM conversion of MeasurePolicy interface works again.
  */
-fun MeasurePolicy (block: MeasureScope.(List<Measurable>, Constraints) -> MeasureResult): MeasurePolicy {
+fun MeasurePolicy(
+    block: MeasureScope.(List<Measurable>, Constraints) -> MeasureResult
+): MeasurePolicy {
     return object : MeasurePolicy {
-        override  fun MeasureScope.measure(
+        override fun MeasureScope.measure(
             measurables: List<Measurable>,
             constraints: Constraints
         ): MeasureResult = this.block(measurables, constraints)
