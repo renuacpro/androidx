@@ -21,6 +21,7 @@ import kotlinx.coroutines.yield
 import kotlin.native.identityHashCode
 import kotlin.system.getTimeNanos
 import kotlin.time.ExperimentalTime
+import kotlin.native.concurrent.isFrozen
 import kotlin.native.concurrent.freeze
 import kotlin.native.concurrent.ensureNeverFrozen
 
@@ -53,24 +54,33 @@ internal actual open class ThreadLocal<T> actual constructor(
     }
 }
 
+/**
+ * AtomicReference implementation suitable for both single and multi-threaded context.
+ */
 actual class AtomicReference<V> actual constructor(value: V) {
-    private val delegate = kotlin.native.concurrent.AtomicReference(value.freeze())
+    private val delegate = kotlin.native.concurrent.FreezableAtomicReference(value)
 
     actual fun get(): V = delegate.value
 
     actual fun set(value: V) {
-        delegate.value = value.freeze()
+        if (delegate.isFrozen)
+            value.freeze()
+        delegate.value = value
     }
 
     actual fun getAndSet(value: V): V {
-        value.freeze()
+        if (delegate.isFrozen)
+            value.freeze()
         var old = delegate.value
         while (!delegate.compareAndSet(old, value)) { old = delegate.value }
         return old
     }
 
-    actual fun compareAndSet(expect: V, newValue: V): Boolean =
-        delegate.compareAndSet(expect, newValue.freeze())
+    actual fun compareAndSet(expect: V, newValue: V): Boolean {
+        if (delegate.isFrozen)
+            newValue.freeze()
+        return delegate.compareAndSet(expect, newValue)
+    }
 }
 
 actual class AtomicInt actual constructor(value: Int) {
