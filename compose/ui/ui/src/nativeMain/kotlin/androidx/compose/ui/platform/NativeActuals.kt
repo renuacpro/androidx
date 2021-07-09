@@ -24,4 +24,3 @@ internal actual fun simpleIdentityToString(obj: Any, name: String?): String {
     val className = name ?: obj::class.qualifiedName ?: "<object>"
     return "$className@${obj.hashCode()}"
 }
-
