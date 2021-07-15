@@ -35,8 +35,33 @@ internal actual fun ActualParagraphIntrinsics(
     placeholders: List<Range<Placeholder>>,
     density: Density,
     resourceLoader: Font.ResourceLoader
-): ParagraphIntrinsics =
-    TODO("implement native ActualParagraphIntrinsics")
+): ParagraphIntrinsics = NativeParagraphIntrinsics(
+    text = text,
+    style = style,
+    spanStyles = spanStyles,
+    placeholders = placeholders,
+    density = density,
+    resourceLoader = resourceLoader
+)
+
+internal class NativeParagraphIntrinsics(
+    val text: String,
+    style: TextStyle,
+    spanStyles: List<Range<SpanStyle>>,
+    placeholders: List<Range<Placeholder>>,
+    density: Density,
+    resourceLoader: Font.ResourceLoader
+) : ParagraphIntrinsics {
+
+    // Todo: add skia paragraph reference, use it in NativeParagraph.native.kt
+    // lateinit var para: Paragraph
+
+    override val minIntrinsicWidth: Float
+        get() = 1.0f//TODO("Not yet implemented")
+    override val maxIntrinsicWidth: Float
+        get() = 1.0f//TODO("Not yet implemented")
+}
+
 /*
     DesktopParagraphIntrinsics(
         text,

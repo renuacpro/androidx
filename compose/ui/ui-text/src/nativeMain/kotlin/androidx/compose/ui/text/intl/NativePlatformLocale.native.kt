@@ -16,27 +16,29 @@
 
 package androidx.compose.ui.text.intl
 
-//import java.util.Locale
+import platform.Foundation.*
 
-internal class NativeLocale(val locale: Locale) : PlatformLocale {
+internal class NativeLocale(val locale: NSLocale) : PlatformLocale {
+
     override val language: String
-        get() = TODO("implement native locale.language") // locale.language
+        get() = locale.languageCode!!
 
     override val script: String
-        get() = TODO("implement native locale.script") // locale.script
+        get() = locale.scriptCode!!
 
     override val region: String
-        get() = TODO("implement native locale.region") // locale.country
+        get() = locale.countryCode!!
 
-    override fun toLanguageTag(): String = TODO("implement native toLanguageTag") // locale.toLanguageTag()
+    override fun toLanguageTag(): String = locale.localeIdentifier!!
 }
 
 internal actual fun createPlatformLocaleDelegate(): PlatformLocaleDelegate =
     object : PlatformLocaleDelegate {
-      override val current: List<PlatformLocale>
-        get() = listOf(NativeLocale(Locale("utf-8")))
+        override val current: List<PlatformLocale>
+            get() = listOf(NativeLocale(NSLocale.currentLocale))
 
-      override fun parseLanguageTag(languageTag: String): PlatformLocale =
-        TODO("parseLanguageTag unimplemented") 
+        override fun parseLanguageTag(languageTag: String): PlatformLocale {
+            return NativeLocale(NSLocale(languageTag))
+        }
     }
 

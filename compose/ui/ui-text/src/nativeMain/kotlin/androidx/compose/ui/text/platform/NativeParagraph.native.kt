@@ -90,23 +90,19 @@ internal actual fun ActualParagraph(
     width: Float,
     density: Density,
     resourceLoader: Font.ResourceLoader
-): Paragraph =
-    TODO("implement native ActualParagraph")
-    /*
-    DesktopParagraph(
-    DesktopParagraphIntrinsics(
-        text,
-        style,
-        spanStyles,
-        placeholders,
-        density,
-        resourceLoader
+): Paragraph = NativeParagraph(
+    paragraphIntrinsics = NativeParagraphIntrinsics(
+        text = text,
+        style = style,
+        spanStyles = spanStyles,
+        placeholders = placeholders,
+        density = density,
+        resourceLoader = resourceLoader
     ),
-    maxLines,
-    ellipsis,
-    width
+    maxLines = maxLines,
+    ellipsis = ellipsis,
+    width = width
 )
-*/
 
 @Suppress("UNUSED_PARAMETER")
 internal actual fun ActualParagraph(
@@ -114,8 +110,145 @@ internal actual fun ActualParagraph(
     maxLines: Int,
     ellipsis: Boolean,
     width: Float
-): Paragraph =
-    TODO("implement ActualParagraph")
+): Paragraph = NativeParagraph(
+    paragraphIntrinsics = paragraphIntrinsics,
+    maxLines = maxLines,
+    ellipsis = ellipsis,
+    width = width
+)
+
+//fun FontStyle.toSkFontStyle(): SkFontStyle {
+//    return when (this) {
+//        FontStyle.Italic -> org.jetbrains.skija.FontStyle.ITALIC
+//        else -> org.jetbrains.skija.FontStyle.NORMAL
+//    }
+//}
+
+internal class NativeParagraph(
+    paragraphIntrinsics: ParagraphIntrinsics,
+    val maxLines: Int,
+    val ellipsis: Boolean,
+    override val width: Float
+) : Paragraph {
+
+    init {
+//        if (resetMaxLinesIfNeeded()) {
+//            rebuildParagraph()
+//        }
+//        para.layout(width)
+    }
+
+    val nativeParagraphIntrinsics = paragraphIntrinsics as NativeParagraphIntrinsics
+
+
+    //val para: SkParagraph
+    //    get() = paragraphIntrinsics.para
+
+    override val height: Float
+        get() = 2.0f//TODO("Not yet implemented")
+
+    override val minIntrinsicWidth: Float
+        get() = nativeParagraphIntrinsics.minIntrinsicWidth
+
+    override val maxIntrinsicWidth: Float
+        get() = nativeParagraphIntrinsics.maxIntrinsicWidth
+
+    override val firstBaseline: Float
+        get() = 0f //TODO("Not yet implemented")
+
+    override val lastBaseline: Float
+        get() = 0f //TODO("Not yet implemented")
+
+    override val didExceedMaxLines: Boolean
+        get() = false //TODO("Not yet implemented")
+
+    override val lineCount: Int
+        get() = 1 //TODO("Not yet implemented")
+
+    override val placeholderRects: List<Rect?>
+        get() = emptyList()//TODO("Not yet implemented")
+
+    override fun getPathForRange(start: Int, end: Int): Path {
+        TODO("Not yet implemented")
+    }
+
+    override fun getCursorRect(offset: Int): Rect {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineLeft(lineIndex: Int): Float {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineRight(lineIndex: Int): Float {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineTop(lineIndex: Int): Float {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineBottom(lineIndex: Int): Float {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineHeight(lineIndex: Int): Float {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineWidth(lineIndex: Int): Float {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineStart(lineIndex: Int): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineEnd(lineIndex: Int, visibleEnd: Boolean): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun isLineEllipsized(lineIndex: Int): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineForOffset(offset: Int): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun getHorizontalPosition(offset: Int, usePrimaryDirection: Boolean): Float {
+        TODO("Not yet implemented")
+    }
+
+    override fun getParagraphDirection(offset: Int): ResolvedTextDirection {
+        TODO("Not yet implemented")
+    }
+
+    override fun getBidiRunDirection(offset: Int): ResolvedTextDirection {
+        TODO("Not yet implemented")
+    }
+
+    override fun getLineForVerticalPosition(vertical: Float): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun getOffsetForPosition(position: Offset): Int {
+        TODO("Not yet implemented")
+    }
+
+    override fun getBoundingBox(offset: Int): Rect {
+        TODO("Not yet implemented")
+    }
+
+    override fun getWordBoundary(offset: Int): TextRange {
+        TODO("Not yet implemented")
+    }
+
+    override fun paint(canvas: Canvas, color: Color, shadow: Shadow?, textDecoration: TextDecoration?) {
+        TODO("Not yet implemented")
+    }
+}
+
 /*
 DesktopParagraph(
     paragraphIntrinsics as DesktopParagraphIntrinsics,

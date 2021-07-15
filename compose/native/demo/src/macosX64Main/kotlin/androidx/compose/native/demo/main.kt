@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.native.Window
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,6 +35,8 @@ fun createWindow(title: String) {
     Window(title) {
         var tick by remember { mutableStateOf(false) }
         Column {
+            Text(text = "HELLO WORLD!!!")
+
             Box(
                 modifier = Modifier
                     .padding(16.dp)
