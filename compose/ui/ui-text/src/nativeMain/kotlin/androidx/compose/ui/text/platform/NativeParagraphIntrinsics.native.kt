@@ -21,12 +21,11 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.resolveTextDirection
 import androidx.compose.ui.text.style.ResolvedTextDirection
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.Density
-// import org.jetbrains.skija.paragraph.Paragraph
 import kotlin.math.ceil
+import org.jetbrains.skiko.skia.native.Paragraph as SkParagraph
 
 internal actual fun ActualParagraphIntrinsics(
     text: String,
@@ -54,37 +53,15 @@ internal class NativeParagraphIntrinsics(
 ) : ParagraphIntrinsics {
 
     // Todo: add skia paragraph reference, use it in NativeParagraph.native.kt
-    // lateinit var para: Paragraph
+    lateinit var para: SkParagraph
 
-    override val minIntrinsicWidth: Float
-        get() = 1.0f//TODO("Not yet implemented")
-    override val maxIntrinsicWidth: Float
-        get() = 1.0f//TODO("Not yet implemented")
-}
-
-/*
-    DesktopParagraphIntrinsics(
-        text,
-        style,
-        spanStyles,
-        placeholders,
-        density,
-        resourceLoader
-    )
-
-internal class DesktopParagraphIntrinsics(
-    val text: String,
-    style: TextStyle,
-    spanStyles: List<Range<SpanStyle>>,
-    placeholders: List<Range<Placeholder>>,
-    density: Density,
-    resourceLoader: Font.ResourceLoader
-) : ParagraphIntrinsics {
-
+    val builder: ParagraphBuilder
     val fontLoader = resourceLoader as FontLoader
     val textDirection = resolveTextDirection(style.textDirection)
-    val builder: ParagraphBuilder
-    var para: Paragraph
+
+    override val minIntrinsicWidth = ceil(para.getMinIntrinsicWidth()).toFloat()
+    override val maxIntrinsicWidth = ceil(para.getMaxIntrinsicWidth()).toFloat()
+
     init {
         builder = ParagraphBuilder(
             fontLoader = fontLoader,
@@ -95,13 +72,10 @@ internal class DesktopParagraphIntrinsics(
             density = density,
             textDirection = textDirection
         )
-        para = builder.build()
 
+        para = builder.build()
         para.layout(Float.POSITIVE_INFINITY)
     }
-
-    override val minIntrinsicWidth = ceil(para.getMinIntrinsicWidth())
-    override val maxIntrinsicWidth = ceil(para.getMaxIntrinsicWidth())
 
     private fun resolveTextDirection(direction: TextDirection?): ResolvedTextDirection {
         return when (direction) {
@@ -110,19 +84,19 @@ internal class DesktopParagraphIntrinsics(
             TextDirection.Content -> contentBasedTextDirection() ?: ResolvedTextDirection.Ltr
             TextDirection.ContentOrLtr -> contentBasedTextDirection() ?: ResolvedTextDirection.Ltr
             TextDirection.ContentOrRtl -> contentBasedTextDirection() ?: ResolvedTextDirection.Rtl
-            null -> ResolvedTextDirection.Ltr
+            else -> ResolvedTextDirection.Ltr
         }
     }
 
     private fun contentBasedTextDirection(): ResolvedTextDirection? {
-        for (char in text) {
-            when (char.directionality) {
-                CharDirectionality.LEFT_TO_RIGHT -> return ResolvedTextDirection.Ltr
-                CharDirectionality.RIGHT_TO_LEFT -> return ResolvedTextDirection.Rtl
-                else -> continue
-            }
-        }
+        // TODO: implement contentBasedTextDirection
+//        for (char in text) {
+//            when (char.directionality) {
+//                CharDirectionality.LEFT_TO_RIGHT -> return ResolvedTextDirection.Ltr
+//                CharDirectionality.RIGHT_TO_LEFT -> return ResolvedTextDirection.Rtl
+//                else -> continue
+//            }
+//        }
         return null
     }
 }
-*/

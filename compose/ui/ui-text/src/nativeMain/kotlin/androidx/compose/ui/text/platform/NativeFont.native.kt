@@ -33,9 +33,105 @@ import org.jetbrains.skija.paragraph.TypefaceFontProvider
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.Typeface
 
-class FontLoader : Font.ResourceLoader {
-    override fun load(font: Font): Any = error("implement native FontLoader")
+import org.jetbrains.skiko.skia.native.FontCollection
+import org.jetbrains.skiko.skia.native.SkTypeface
+import org.jetbrains.skiko.skia.native.TypefaceFontProvider
+import org.jetbrains.skiko.skia.native.FontMgr
+
+internal val GenericFontFamiliesMapping by lazy {
+    mapOf(
+        FontFamily.SansSerif.name to listOf(
+            "Helvetica Neue",
+            "Helvetica"
+        ),
+        FontFamily.Serif.name to listOf("Times"),
+        FontFamily.Monospace.name to listOf("Courier"),
+        FontFamily.Cursive.name to listOf("Apple Chancery")
+    )
 }
+
+internal fun FontListFontFamily.makeAlias(): String {
+//    val digest = MessageDigest.getInstance("SHA-256")
+//    fonts.fastForEach { font ->
+//        when (font) {
+//            is DesktopFont -> {
+//                digest.update(font.identity.toByteArray())
+//            }
+//        }
+//    }
+//    return "-compose-${digest.digest().toHexString()}"
+    return ""
+}
+
+class FontLoader : Font.ResourceLoader {
+
+    val fonts = FontCollection()
+    private val fontProvider = TypefaceFontProvider()
+
+    init {
+        fonts.setDefaultFontManager(FontMgr.RefDefault())
+        fonts.setAssetFontManager(fontProvider)
+    }
+
+    private val registered = HashSet<String>()
+
+    private fun mapGenericFontFamily(generic: GenericFontFamily): List<String> {
+        return GenericFontFamiliesMapping[generic.name]
+            ?: error("Unknown generic font family ${generic.name}")
+    }
+
+    override fun load(font: Font): Any = error("implement native FontLoader")
+
+    internal fun ensureRegistered(fontFamily: FontFamily): List<String> =
+        when (fontFamily) {
+            is FontListFontFamily -> {
+                val alias = fontFamily.makeAlias()
+                if (!registered.contains(alias)) {
+                    fontFamily.fonts.forEach {
+                        fontProvider.registerTypeface(load(it), alias)
+                    }
+                    registered.add(alias)
+                }
+                listOf(alias)
+            }
+            is LoadedFontFamily -> {
+                val typeface = fontFamily.typeface as NativeTypeface
+                val alias = typeface.alias ?: typeface.nativeTypeface.familyName
+                if (!registered.contains(alias)) {
+                    fontProvider.registerTypeface(typeface.nativeTypeface, alias)
+                    registered.add(alias)
+                }
+                listOf(alias)
+            }
+            is GenericFontFamily -> mapGenericFontFamily(fontFamily)
+            FontFamily.Default -> listOf()
+            else -> throw IllegalArgumentException("Unknown font family type: $fontFamily")
+        }
+
+    internal fun findTypeface(
+        fontFamily: FontFamily,
+        fontWeight: FontWeight = FontWeight.Normal,
+        fontStyle: FontStyle = FontStyle.Normal
+    ): SkTypeface? {
+        return when (fontFamily) {
+            FontFamily.Default -> fonts.defaultFallback()
+            else -> {
+//                val aliases = ensureRegistered(fontFamily)
+//                val style = fontStyle.toSkFontStyle()//.withWeight(fontWeight.weight)
+                //fonts.findTypefaces(aliases.toTypedArray(), style).first()
+                fonts.defaultFallback()
+            }
+        }
+    }
+}
+
+internal class NativeTypeface(
+    val alias: String?,
+    val nativeTypeface: SkTypeface
+) : Typeface {
+    override val fontFamily: FontFamily? = null
+}
+
 /*
 internal val GenericFontFamiliesMapping by lazy {
     when (Platform.Current) {
