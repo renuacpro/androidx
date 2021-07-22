@@ -69,21 +69,25 @@ import java.util.WeakHashMap
 import kotlin.math.floor
 /*
 import org.jetbrains.skija.Rect as SkRect
-import org.jetbrains.skija.paragraph.Paragraph as SkParagraph
-import org.jetbrains.skija.paragraph.TextStyle as SkTextStyle
-import org.jetbrains.skija.FontStyle as SkFontStyle
+import org.jetbrains.skija.paragraph.Paragraph as SkiaParagraph
+import org.jetbrains.skija.paragraph.TextStyle as SkiaTextStyle
+import org.jetbrains.skija.FontStyle as SkiaFontStyle
 import org.jetbrains.skija.Font as SkFont
 import org.jetbrains.skija.paragraph.DecorationLineStyle as SkDecorationLineStyle
 import org.jetbrains.skija.paragraph.DecorationStyle as SkDecorationStyle
 import org.jetbrains.skija.paragraph.Shadow as SkShadow
 */
-import org.jetbrains.skiko.skia.native.Paragraph as SkParagraph
-import org.jetbrains.skiko.skia.native.ParagraphBuilder as SkParagraphBuilder
-import org.jetbrains.skiko.skia.native.TextStyle as SkTextStyle
+import kotlinx.cinterop.*
+
+import org.jetbrains.skiko.skia.native.Paragraph as SkiaParagraph
+import org.jetbrains.skiko.skia.native.ParagraphBuilder as SkiaParagraphBuilder
+import org.jetbrains.skiko.skia.native.TextStyle as SkiaTextStyle
+import org.jetbrains.skiko.skia.native.Typeface as SkiaTypeface
 import org.jetbrains.skiko.skia.native.SkFontStyle
 import org.jetbrains.skiko.skia.native.skia__textlayout__ParagraphStyle as ParagraphStyle
-import org.jetbrains.skiko.skia.native.SkFont
+import org.jetbrains.skiko.skia.native.Font as SkiaFont
 import org.jetbrains.skiko.skia.native.SkFontMetrics
+import org.jetbrains.skiko.skia.native.__ParagraphBuilder__Build
 import org.jetbrains.skiko.skia.native.*
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.cValuesOf
@@ -151,7 +155,7 @@ internal class NativeParagraph(
     val nativeParagraphIntrinsics = paragraphIntrinsics as NativeParagraphIntrinsics
 
 
-    //val para: SkParagraph
+    //val para: SkiaParagraph
     //    get() = paragraphIntrinsics.para
 
     override val height: Float
@@ -270,7 +274,7 @@ private fun fontSizeInHierarchy(density: Density, base: Float, other: TextUnit):
 
 // Computed ComputedStyles always have font/letter size in pixels for particular `density`.
 // It's important because density could be changed in runtime and it should force
-// SkTextStyle to be recalculated. Or we can have different densities in different windows.
+// SkiaTextStyle to be recalculated. Or we can have different densities in different windows.
 private data class ComputedStyle(
     var color: Color,
     var fontSize: Float,
@@ -312,8 +316,8 @@ private data class ComputedStyle(
         shadow = spanStyle.shadow
     )
 
-    fun toSkTextStyle(fontLoader: FontLoader): SkTextStyle {
-        val res = SkTextStyle()
+    fun toSkiaTextStyle(fontLoader: FontLoader): SkiaTextStyle {
+        val res = SkiaTextStyle()
         if (color != Color.Unspecified) {
 //            res.setColor(color.toArgb())
             res.setColor(SK_ColorDKGRAY)
@@ -422,16 +426,16 @@ internal class ParagraphBuilder(
     private lateinit var ops: List<Op>
 
     /**
-     * SkParagraph styles model doesn't match Compose's one.
-     * SkParagraph has only a stack-based push/pop styles interface that works great with Span
+     * SkiaParagraph styles model doesn't match Compose's one.
+     * SkiaParagraph has only a stack-based push/pop styles interface that works great with Span
      * trees.
      * But in Compose we have a list of SpanStyles attached to arbitrary ranges, possibly
      * overlapped, where a position in the list denotes style's priority
-     * We map Compose styles to SkParagraph styles by projecting every range start/end to single
+     * We map Compose styles to SkiaParagraph styles by projecting every range start/end to single
      * positions line and maintaining a list of active styles while building a paragraph. This list
-     * of active styles is being compiled into single SkParagraph's style for every chunk of text
+     * of active styles is being compiled into single SkiaParagraph's style for every chunk of text
      */
-    fun build(): SkParagraph {
+    fun build(): SkiaParagraph {
         initialStyle = textStyle.toSpanStyle().withDefaultFontSize()
         defaultStyle = ComputedStyle(density, initialStyle)
         ops = makeOps(
@@ -450,7 +454,7 @@ internal class ParagraphBuilder(
         val cvaluesRefParagraphStyle:  CValuesRef<ParagraphStyle> = ps.readValue()
         val cPointerFonts: CPointer<skia__textlayout__FontCollection> = fontLoader.fonts.ptr
 
-        val pb = SkParagraphBuilder(cvaluesRefParagraphStyle, cPointerFonts)
+        val pb = SkiaParagraphBuilder(cvaluesRefParagraphStyle, cPointerFonts)
 
         var addText = true
 
@@ -461,9 +465,9 @@ internal class ParagraphBuilder(
 
             when (op) {
                 is Op.StyleAdd -> {
-                    // cached SkTextStyled could was loaded with a different font loader
+                    // cached SkiaTextStyled could was loaded with a different font loader
                     //ensureFontsAreRegistered(fontLoader, op.style)
-                    //pb.pushStyle(makeSkTextStyle(op.style))
+                    //pb.pushStyle(makeSkiaTextStyle(op.style))
                 }
                 is Op.PutPlaceholder -> {
 //                    val placeholderStyle =
@@ -493,6 +497,11 @@ internal class ParagraphBuilder(
 
         return pb.build()
     }
+
+    // TODO: this is to workaround interop inability to process uniq_ptr.
+    // See skiko def file for the wrapper details.
+    private fun SkiaParagraphBuilder.build() =
+        SkiaParagraph(__ParagraphBuilder__Build(this.cpp.ptr)!!.pointed, managed = true)
 
     private fun ensureFontsAreRegistered(fontLoader: FontLoader, style: ComputedStyle) {
         style.fontFamily?.let {
@@ -651,10 +660,10 @@ internal class ParagraphBuilder(
         return pStyle
     }
 
-    private fun makeSkTextStyle(style: ComputedStyle): SkTextStyle {
-        return style.toSkTextStyle(fontLoader)
-//        return skTextStylesCache.getOrPut(style) {
-//            style.toSkTextStyle(fontLoader)
+    private fun makeSkiaTextStyle(style: ComputedStyle): SkiaTextStyle {
+        return style.toSkiaTextStyle(fontLoader)
+//        return SkiaTextStylesCache.getOrPut(style) {
+//            style.toSkiaTextStyle(fontLoader)
 //        }
     }
 
@@ -665,9 +674,9 @@ internal class ParagraphBuilder(
 //                textStyle.fontWeight ?: FontWeight.Normal(),
 //                textStyle.fontStyle ?: FontStyle.Normal()
 //            )
-//        } ?: SkTypeface.MakeDefault()
-        val typeface = SkTypeface.MakeDefault()
-        SkFont(typeface, defaultStyle.fontSize)
+//        } ?: SkiaTypeface.MakeDefault()
+        val typeface = SkiaTypeface.MakeDefault()
+        SkiaFont(typeface, defaultStyle.fontSize)
     }
 
     internal val defaultHeight by lazy {

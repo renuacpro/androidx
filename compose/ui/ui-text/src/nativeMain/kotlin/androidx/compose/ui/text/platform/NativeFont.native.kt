@@ -33,10 +33,13 @@ import org.jetbrains.skija.paragraph.TypefaceFontProvider
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.Typeface
 
+import kotlinx.cinterop.*
+
 import org.jetbrains.skiko.skia.native.FontCollection
-import org.jetbrains.skiko.skia.native.SkTypeface
+import org.jetbrains.skiko.skia.native.Typeface as SkiaTypeface
 import org.jetbrains.skiko.skia.native.TypefaceFontProvider
 import org.jetbrains.skiko.skia.native.FontMgr
+import org.jetbrains.skiko.skia.native.SkFontMgr
 
 internal val GenericFontFamiliesMapping by lazy {
     mapOf(
@@ -63,6 +66,9 @@ internal fun FontListFontFamily.makeAlias(): String {
     return ""
 }
 
+private val TypefaceFontProvider.asFontMgr
+    get() = FontMgr(this.cpp.ptr.reinterpret<SkFontMgr>().pointed, managed = false)
+
 class FontLoader : Font.ResourceLoader {
 
     val fonts = FontCollection()
@@ -70,7 +76,7 @@ class FontLoader : Font.ResourceLoader {
 
     init {
         fonts.setDefaultFontManager(FontMgr.RefDefault())
-        fonts.setAssetFontManager(fontProvider)
+        fonts.setAssetFontManager(fontProvider.asFontMgr)
     }
 
     private val registered = HashSet<String>()
@@ -80,7 +86,7 @@ class FontLoader : Font.ResourceLoader {
             ?: error("Unknown generic font family ${generic.name}")
     }
 
-    override fun load(font: Font): Any = error("implement native FontLoader")
+    override fun load(font: Font): SkiaTypeface = error("implement native FontLoader")
 
     internal fun ensureRegistered(fontFamily: FontFamily): List<String> =
         when (fontFamily) {
@@ -112,7 +118,7 @@ class FontLoader : Font.ResourceLoader {
         fontFamily: FontFamily,
         fontWeight: FontWeight = FontWeight.Normal,
         fontStyle: FontStyle = FontStyle.Normal
-    ): SkTypeface? {
+    ): SkiaTypeface? {
         return when (fontFamily) {
             FontFamily.Default -> fonts.defaultFallback()
             else -> {
@@ -127,7 +133,7 @@ class FontLoader : Font.ResourceLoader {
 
 internal class NativeTypeface(
     val alias: String?,
-    val nativeTypeface: SkTypeface
+    val nativeTypeface: SkiaTypeface
 ) : Typeface {
     override val fontFamily: FontFamily? = null
 }
